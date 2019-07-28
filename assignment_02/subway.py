@@ -1,34 +1,53 @@
 from selenium import webdriver
+from pyquery import PyQuery as pq
+import re
 import time
 
 browser = webdriver.Chrome()
-# html = browser.page_source
-# data = str(html)
-browser.get('https://www.bjsubway.com/station/xltcx/')
 
-subway_text = browser.find_element_by_class_name('line_content').text
+browser.get('http://www.bjsubway.com/e/action/ListInfo/?classid=39&ph=1')
 
-subway_list = str(subway_text).split('\n')
+# 获取网页源码
+html_source = browser.page_source
+doc = pq(str(html_source))
+lines = []
 
-lines = ['1号线', '2号线', '4号线', '5号线', '6号线', '7号线', '8号线北', '8号线南', '9号线', '10号线', '13号线', '14号线西', '14号线东', '15号线',
-         '16号线', '八通线', '昌平线', '亦庄线', '房山线', '机场线', 'S1线', '燕房线', '西郊线']
+# 地铁路线字典，k=line，v=stations
+subway_dict = {}
+for i in range(20):
+    line_id = '#sub' + str(i) + ' .con_text table thead tr:first-child'
+    station_id = '#sub' + str(i) + ' .con_text table tbody'
+    line_text = doc(line_id).text().split(' ')
+    table_body = doc(station_id)
+    for j in range(len(table_body)):
+        line = line_text[j].replace('首末车时刻表', '')
+        if line in lines: continue
+        lines.append(line)
+        stations_data = re.findall('[\u4e00-\u9fa5]+', doc(table_body[j]).text())
+        while '暂缓开通' in stations_data:
+            stations_data.remove('暂缓开通')
+        _stations = stations_data[::2] if line == '4号线/大兴线' else stations_data
+        print(line, _stations)
+        stations = sorted(set(_stations), key=_stations.index)
+        subway_dict[line] = stations
 
-line = ''
-
+# 搜索每个站点的位置
 browser.get('https://lbs.amap.com/console/show/picker')
+with open('subway0.txt', 'w') as f:
+    f.write('line,station,dimension,longitude\n')
+    for line, stations in subway_dict.items():
+        for station in stations:
+            if len(station) > 7: continue
+            browser.find_element_by_id('txtSearch').clear()
+            time.sleep(0.2)
+            if station == '通州北苑':
+                browser.find_element_by_id('txtSearch').send_keys(station)
+            else:
+                browser.find_element_by_id('txtSearch').send_keys(station + '地铁站')
+            browser.find_element_by_class_name('btn-search').click()
+            position = browser.find_element_by_id('txtCoordinate').get_attribute('value')
+            per_line = line + ',' + station + ',' + position + '\n'
+            print(per_line)
+            f.write(per_line)
 
-with open('subway.txt', 'w') as file:
-    file.write('line,station,dimension,longitude\n')
-    for ele in subway_list:
-        if len(ele) > 7: continue
-        if ele in lines:
-            line = ele
-            continue
-        browser.find_element_by_id('txtSearch').clear()
-        time.sleep(0.4)
-        browser.find_element_by_id('txtSearch').send_keys(ele + '地铁站')
-        browser.find_element_by_class_name('btn-search').click()
-        position = browser.find_element_by_id('txtCoordinate').get_attribute('value')
-        file.write(line + ',' + ele + ',' + position + '\n')
-
-print('The end')
+print('over over')
