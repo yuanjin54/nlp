@@ -1,4 +1,4 @@
-# NLP作业
+# NLP assignment
 ## assignment_01
 - [课堂回顾](https://github.com/yuanjin54/nlp/blob/master/assignment_01/lesson-01-exercise.ipynb)
 - [课后作业](https://github.com/yuanjin54/nlp/blob/master/assignment_01/assignment-01.ipynb)
@@ -11,7 +11,7 @@
   + 爬取站点信息
   + 爬取经纬度数据
 
-## assignment_03
+## assignment_03 
 - [课堂回顾](https://github.com/yuanjin54/nlp/blob/master/assignment_03/lesson-03-exercise.ipynb)
 - [课后作业](https://github.com/yuanjin54/nlp/blob/master/assignment_03/assignment-03.ipynb)
 
