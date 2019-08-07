@@ -76,10 +76,10 @@ def train_model():
 @decorator
 def predict_model():
     model = Word2Vec.load(MODEL_PATH)
-    s_1, s_2 = '', ''
+    s_1, s_2 = 's1', 's2'
     try:
         # 查看两个词相似度
-        s_1 = model.similarity('爱情', '友情')
+        s_1 = model.similarity('教师', '老师')
         # 查看和 这个词最相关的几个词
         s_2 = model.most_similar('数学')
     except KeyError:
@@ -90,7 +90,8 @@ def predict_model():
     print(model.wv['数学'])
 
 
-def tsne_plot(model):
+def tsne_plot():
+    model = Word2Vec.load(MODEL_PATH)
     "Creates and TSNE model and plots it"
     labels = []
     tokens = []
@@ -121,9 +122,8 @@ if __name__ == '__main__':
     logger = save_log()
     DATA_PATH = '../../zhwiki/'
     CUT_WORDS_RESULT = 'cut_words_result'
-    MODEL_PATH = 'model.Word2Vec'
+    MODEL_PATH = 'Word2Vec.model'
     cut_word()
     train_model()
-    model = Word2Vec.load(MODEL_PATH)
     predict_model()
-    tsne_plot(model)
+    tsne_plot()
